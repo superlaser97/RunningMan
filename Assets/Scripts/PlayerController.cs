@@ -7,6 +7,13 @@ public class PlayerController : MonoBehaviour
     public static PlayerController instance;
     private Rigidbody2D m_RigidBody2D;
 
+
+
+    [Header("Debug")]
+    [SerializeField]
+    private Transform startPos;
+
+
     [Header("Movement Parameters")]
     [SerializeField]
     private float maxMoveSpd = 200f;
@@ -19,14 +26,23 @@ public class PlayerController : MonoBehaviour
     [SerializeField]
     private float jumpTapMaxDelay = 0.1f;
 
-    [Header("Jumping Parameters")]
-    [SerializeField]
-    private float jumpForce = 5f;
-    
     private float currMovementSpd;
     private float lastTapDuration = 0f;
     public enum MovementDirection { NEUTRAL, LEFT, RIGHT };
     private MovementDirection currMovementDir = MovementDirection.NEUTRAL;
+
+
+
+    [Header("Jumping Parameters")]
+    [SerializeField]
+    private float jumpForce = 5f;
+    [SerializeField]
+    private Transform groundChkOrigin;
+    [SerializeField]
+    private float groundChkRayLen = 0.1f;
+
+    private float currMoveSpdInAir = 0f;
+    
 
     private void Start()
     {
@@ -47,7 +63,7 @@ public class PlayerController : MonoBehaviour
     {
         if (dir != currMovementDir)
         {
-            if(lastTapDuration < jumpTapMaxDelay)
+            if(lastTapDuration < jumpTapMaxDelay && IsOnGround())
             {
                 Jump();
                 return;
@@ -79,13 +95,45 @@ public class PlayerController : MonoBehaviour
 
     private void Move()
     {
-        m_RigidBody2D.velocity = new Vector2(currMovementSpd * Time.deltaTime * maxMoveSpd, m_RigidBody2D.velocity.y);
+        float moveSpd = 0;
+
+        if (IsOnGround())
+            moveSpd = currMovementSpd;
+        else
+            moveSpd = currMoveSpdInAir;
+
+        m_RigidBody2D.velocity = new Vector2(moveSpd * Time.deltaTime * maxMoveSpd, m_RigidBody2D.velocity.y);
     }
 
     [ContextMenu("Jump")]
     private void Jump()
     {
         m_RigidBody2D.AddForce(transform.up * jumpForce, ForceMode2D.Impulse);
+        currMoveSpdInAir = currMovementSpd;
+    }
+
+    [ContextMenu("Teleport To Start")]
+    private void TeleportToStart()
+    {
+        if(startPos)
+            transform.position = startPos.position;
+
+        currMoveSpdInAir = 0;
+    }
+
+    private bool IsOnGround()
+    {
+        Debug.DrawLine(groundChkOrigin.position, groundChkOrigin.position - transform.up * groundChkRayLen, Color.red);
+
+        RaycastHit2D hitInfo;
+        int layersToHit = LayerMask.GetMask("Ground");
+        if (Physics2D.Raycast(groundChkOrigin.position, -transform.up, groundChkRayLen, layersToHit))
+        {
+            Debug.Log("OnGround");
+            return true;
+        }
+        Debug.Log("Not OnGround");
+        return false;
     }
 
     public float GetCurrentSpeed()
