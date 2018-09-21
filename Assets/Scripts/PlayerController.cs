@@ -44,7 +44,7 @@ public class PlayerController : MonoBehaviour
     private float currMoveSpdInAir = 0f;
     
 
-    private void Start()
+    private void Awake()
     {
         if(instance)
         {
@@ -139,5 +139,9 @@ public class PlayerController : MonoBehaviour
     public float GetCurrentSpeed()
     {
         return currMovementSpd;
+    }
+    public float GetMaxSpeed()
+    {
+        return maxMoveSpd;
     }
 }
