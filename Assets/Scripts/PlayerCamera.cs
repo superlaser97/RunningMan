@@ -38,7 +38,7 @@ public class PlayerCamera : MonoBehaviour {
     {
         //If the player move faster than lerp, it'll look like it's at the center when it's just right.
         Vector3 newOffsetPos = new Vector3(CameraOffSet.x,
-            CameraOffSet.y,
+            0,
             m_Camera.transform.position.z);
 
         m_Camera.transform.position = Vector3.Lerp(m_Camera.transform.position, PlayerTransform.position + newOffsetPos, Time.deltaTime * CameraLerpSpeed);

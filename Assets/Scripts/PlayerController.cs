@@ -7,13 +7,6 @@ public class PlayerController : MonoBehaviour
     public static PlayerController instance;
     private Rigidbody2D m_RigidBody2D;
 
-
-
-    [Header("Debug")]
-    [SerializeField]
-    private Transform startPos;
-
-
     [Header("Movement Parameters")]
     [SerializeField]
     private float maxMoveSpd = 200f;
@@ -26,6 +19,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField]
     private float jumpTapMaxDelay = 0.1f;
 
+    [SerializeField]
     private float currMovementSpd;
     private float lastTapDuration = 0f;
     public enum MovementDirection { NEUTRAL, LEFT, RIGHT };
@@ -108,9 +102,7 @@ public class PlayerController : MonoBehaviour
 
         if(IsOnGround())
         currMovementSpd -= movementSpdDecay * Time.deltaTime;
-
-        //if (currMovementSpd < 0 || lastTapDuration > minTapInterval)
-        //Removed the last tap condition ----- To Zhi Heng
+        
         if (currMovementSpd < 0)
             currMovementSpd = 0;
 
@@ -128,23 +120,13 @@ public class PlayerController : MonoBehaviour
 
         m_RigidBody2D.velocity = new Vector2(moveSpd * Time.deltaTime * maxMoveSpd, m_RigidBody2D.velocity.y);
     }
-
-    [ContextMenu("Jump")]
+    
     private void Jump()
     {
         m_RigidBody2D.AddForce(transform.up * jumpForce, ForceMode2D.Impulse);
         currMoveSpdInAir = currMovementSpd;
 
         currMovementDir = MovementDirection.NEUTRAL;
-    }
-
-    [ContextMenu("Teleport To Start")]
-    private void TeleportToStart()
-    {
-        if(startPos)
-            transform.position = startPos.position;
-
-        currMoveSpdInAir = 0;
     }
 
     private bool IsOnGround()
