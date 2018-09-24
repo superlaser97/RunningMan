@@ -31,8 +31,6 @@ public class PlayerController : MonoBehaviour
     public enum MovementDirection { NEUTRAL, LEFT, RIGHT };
     private MovementDirection currMovementDir = MovementDirection.NEUTRAL;
 
-
-
     [Header("Jumping Parameters")]
     [SerializeField]
     private float jumpForce = 5f;
@@ -61,23 +59,45 @@ public class PlayerController : MonoBehaviour
 
     public void OnMovementBtnClick(MovementDirection dir)
     {
-        if (dir != currMovementDir)
+        //New From Zhen Xiong
+        //Increase speed no matter what, if trip will stop, if jump will still add force.
+        currMovementSpd += movementSpdIncreaseAmt;
+        if (currMovementSpd > 1)
+            currMovementSpd = 1;
+
+        if (lastTapDuration < jumpTapMaxDelay)
         {
-            if(lastTapDuration < jumpTapMaxDelay && IsOnGround())
+            if (IsOnGround())
             {
                 Jump();
                 return;
             }
+        }
 
-            currMovementSpd += movementSpdIncreaseAmt;
-            if (currMovementSpd > 1)
-                currMovementSpd = 1;
-        }
-        else
+        if (dir == currMovementDir && IsOnGround())
         {
+            print("Trip");
             currMovementSpd = 0;
-            //Trip
         }
+
+        //Zhi Heng ---- Your Code
+        //if (dir != currMovementDir)
+        //{
+        //    if (lastTapDuration < jumpTapMaxDelay && IsOnGround())
+        //    {
+        //        Jump();
+        //        return;
+        //    }
+
+        //    currMovementSpd += movementSpdIncreaseAmt;
+        //    if (currMovementSpd > 1)
+        //        currMovementSpd = 1;
+        //}
+        //else
+        //{
+        //    currMovementSpd = 0;
+        //    //Trip
+        //}
         lastTapDuration = 0;
         currMovementDir = dir;
     }
@@ -85,9 +105,13 @@ public class PlayerController : MonoBehaviour
     private void Update()
     {
         lastTapDuration += Time.deltaTime;
+
+        if(IsOnGround())
         currMovementSpd -= movementSpdDecay * Time.deltaTime;
 
-        if (currMovementSpd < 0 || lastTapDuration > minTapInterval)
+        //if (currMovementSpd < 0 || lastTapDuration > minTapInterval)
+        //Removed the last tap condition ----- To Zhi Heng
+        if (currMovementSpd < 0)
             currMovementSpd = 0;
 
         Move();
@@ -110,6 +134,8 @@ public class PlayerController : MonoBehaviour
     {
         m_RigidBody2D.AddForce(transform.up * jumpForce, ForceMode2D.Impulse);
         currMoveSpdInAir = currMovementSpd;
+
+        currMovementDir = MovementDirection.NEUTRAL;
     }
 
     [ContextMenu("Teleport To Start")]
